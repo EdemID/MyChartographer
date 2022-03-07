@@ -4,10 +4,8 @@ import com.kuvyrkom.chartographer.usecase.service.ChartographerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -30,5 +28,17 @@ public class ChartaController {
         String id = chartographerService.createNewCharta(width, height);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
+    }
+
+    @PostMapping("/{id}/")
+    public ResponseEntity<String> saveRestoredFragmentCharta(@PathVariable String id,
+                                                             @RequestParam @Min(0) int x,
+                                                             @RequestParam @Min(0) int y,
+                                                             @RequestParam @Min(0) int width,
+                                                             @RequestParam @Min(0) int height,
+                                                             @RequestPart(name = "file", required = false) MultipartFile multipartFile
+                                                             ) {
+        chartographerService.saveRestoredFragmentCharta(id, x, y, width, height, multipartFile);
+        return ResponseEntity.ok().build();
     }
 }
