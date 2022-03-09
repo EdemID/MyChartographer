@@ -1,10 +1,10 @@
 package com.kuvyrkom.chartographer.adapter.persistence.service;
 
 import com.kuvyrkom.chartographer.adapter.persistence.repository.ChartaRepository;
+import com.kuvyrkom.chartographer.adapter.restapi.exception.EntityNotFoundException;
 import com.kuvyrkom.chartographer.domain.model.Charta;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 
 @Service
 public class ChartaServiceImpl {

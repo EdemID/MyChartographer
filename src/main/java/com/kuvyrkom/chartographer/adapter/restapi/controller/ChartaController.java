@@ -24,9 +24,8 @@ public class ChartaController {
 
     @PostMapping
     public ResponseEntity<String> createNewCharta(@RequestParam @Max(20000) @Min(1) int width,
-                                                  @RequestParam @Max(50000) @Min(1) int height) {
+                                                  @RequestParam @Max(50000) @Min(1) int height) throws Exception {
         String id = chartographerService.createNewCharta(width, height);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
@@ -34,11 +33,22 @@ public class ChartaController {
     public ResponseEntity<String> saveRestoredFragmentCharta(@PathVariable String id,
                                                              @RequestParam @Min(0) int x,
                                                              @RequestParam @Min(0) int y,
-                                                             @RequestParam @Min(0) int width,
-                                                             @RequestParam @Min(0) int height,
+                                                             @RequestParam @Min(1) int width,
+                                                             @RequestParam @Min(1) int height,
                                                              @RequestPart(name = "file", required = false) MultipartFile multipartFile
-                                                             ) {
+    ) throws Exception {
         chartographerService.saveRestoredFragmentCharta(id, x, y, width, height, multipartFile);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/{id}/", produces = "image/bmp")
+    public ResponseEntity<byte[]> getRestoredPartOfCharta(@PathVariable String id,
+                                                          @RequestParam @Min(0) int x,
+                                                          @RequestParam @Min(0) int y,
+                                                          @RequestParam @Max(5000) @Min(1) int width,
+                                                          @RequestParam @Max(5000) @Min(1) int height
+    ) throws Exception {
+        byte[] restoredPartOfCharta = chartographerService.getRestoredPartOfCharta(id, x, y, width, height);
+        return ResponseEntity.ok().body(restoredPartOfCharta);
     }
 }
