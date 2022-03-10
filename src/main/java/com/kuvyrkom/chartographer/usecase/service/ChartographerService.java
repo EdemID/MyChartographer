@@ -35,8 +35,8 @@ public class ChartographerService {
     }
 
     public void saveRestoredFragmentCharta(String id, int x, int y, int width, int height, MultipartFile multipartFile) throws Exception {
-        File chartaPath = new File(chartaService.findByFileUUID(id).getFilePath());
-        BufferedImage chartaImage = ImageIO.read(chartaPath);
+        File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
+        BufferedImage chartaImage = ImageIO.read(chartaFile);
 
         BufferedImage image = ImageIO.read(multipartFile.getInputStream());
         BufferedImage fragment = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -47,17 +47,17 @@ public class ChartographerService {
         /***/
         fragmentGraphics.drawImage(image, 0, 0, null);
 
-        Graphics chartaOriginalGraphics = chartaImage.getGraphics();
-        chartaOriginalGraphics.drawImage(fragment, x, y, null);
+        Graphics chartaGraphics = chartaImage.getGraphics();
+        chartaGraphics.drawImage(fragment, x, y, null);
 
-        ImageIO.write(chartaImage, "bmp", chartaPath);
+        ImageIO.write(chartaImage, "bmp", chartaFile);
     }
 
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int width, int height) throws Exception {
         ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
 
-        File chartaPath = new File(chartaService.findByFileUUID(id).getFilePath());
-        BufferedImage charta = ImageIO.read(chartaPath);
+        File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
+        BufferedImage charta = ImageIO.read(chartaFile);
         int widthCharta = charta.getWidth();
         int heightCharta = charta.getHeight();
 
