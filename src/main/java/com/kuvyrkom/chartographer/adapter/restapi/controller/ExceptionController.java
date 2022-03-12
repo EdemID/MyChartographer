@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.imageio.IIOException;
 import javax.validation.ConstraintViolationException;
 import java.awt.image.RasterFormatException;
-import java.io.IOException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -32,11 +30,11 @@ public class ExceptionController {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = {IIOException.class, IOException.class})
-    public ResponseEntity<Response> handleFileNotFoundException(Exception e) {
-        Response response = new Response("Проверь наличие файла: " + e.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
+//    @ExceptionHandler(value = {IIOException.class, IOException.class})
+//    public ResponseEntity<Response> handleFileNotFoundException(Exception e) {
+//        Response response = new Response("Проверь наличие файла: " + e.getMessage());
+//        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+//    }
 
     static class Response {
         private String message;
