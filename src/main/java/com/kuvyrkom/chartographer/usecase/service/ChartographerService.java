@@ -31,14 +31,13 @@ public class ChartographerService {
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
         String filePath = "src/main/resources/graph/" + fileUUID + ".jpg";
-        compareAndWriteToFile(bufferedImage, filePath);
+        compressAndWriteToFile(bufferedImage, filePath);
 
         Charta charta = new Charta(width, height, fileUUID, filePath);
         chartaService.save(charta);
 
         bufferedImage.flush();
         bufferedImage = null;
-        System.gc();
         return fileUUID;
     }
 
@@ -60,15 +59,20 @@ public class ChartographerService {
         chartaGraphics.drawImage(fragment, x, y, null);
         ImageIO.write(chartaImage, "jpg", chartaFile);
 
+        fragmentGraphics.dispose();
+        chartaGraphics.dispose();
         chartaImage.flush();
         fragment.flush();
+        image.flush();
+        fragmentGraphics = null;
+        chartaGraphics = null;
         chartaFile = null;
         fragment = null;
-        System.gc();
+        image = null;
     }
 
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int width, int height) throws Exception {
-        ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
         BufferedImage charta = Imaging.getBufferedImage(chartaFile);
@@ -85,21 +89,25 @@ public class ChartographerService {
             restoredPartOfChartaGraphics.fillRect(0, 0, width, height);
             /***/
             restoredPartOfChartaGraphics.drawImage(charta, 0, 0, null);
+
+            restoredPartOfChartaGraphics.dispose();
         } else {
             restoredPartOfCharta = charta.getSubimage(x, y, width, height);
         }
 
-        ImageIO.write(restoredPartOfCharta, "bmp", imageBytes);
+        ImageIO.write(restoredPartOfCharta, "bmp", byteArrayOutputStream);
 
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+        byteArrayOutputStream.close();
         charta.flush();
         restoredPartOfCharta.flush();
         charta = null;
         restoredPartOfCharta = null;
-        System.gc();
-        return imageBytes.toByteArray();
+        return imageBytes;
     }
 
-    public static void compareAndWriteToFile(BufferedImage image, String filePath) throws IOException {
+    public static void compressAndWriteToFile(BufferedImage image, String filePath) throws IOException {
         File compressedImageFile = new File(filePath);
         OutputStream os = new FileOutputStream(compressedImageFile);
 
