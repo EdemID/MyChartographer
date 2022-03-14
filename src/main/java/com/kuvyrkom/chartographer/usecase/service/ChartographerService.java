@@ -30,7 +30,7 @@ public class ChartographerService {
         String fileUUID = UUID.randomUUID().toString();
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-        String filePath = "src/main/resources/graph/" + fileUUID + ".jpg";
+        String filePath = "src/main/resources/charta/" + fileUUID + ".jpg";
         compressAndWriteToFile(bufferedImage, filePath);
         Charta charta = new Charta(width, height, fileUUID, filePath);
         chartaService.save(charta);

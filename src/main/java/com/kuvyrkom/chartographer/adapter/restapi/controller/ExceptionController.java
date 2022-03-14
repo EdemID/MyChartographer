@@ -22,7 +22,7 @@ public class ExceptionController {
 
     @ExceptionHandler(RasterFormatException.class)
     public ResponseEntity<Response> handleRasterFormatException(RasterFormatException e) {
-        Response response = new Response("Проверь ширину и высоту: " + e.getMessage());
+        Response response = new Response(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -34,7 +34,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value = {IIOException.class, IOException.class})
     public ResponseEntity<Response> handleFileNotFoundException(Exception e) {
-        Response response = new Response("Проверь наличие файла: " + e.getMessage());
+        Response response = new Response(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
