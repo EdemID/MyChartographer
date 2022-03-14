@@ -51,4 +51,10 @@ public class ChartaController {
         byte[] restoredPartOfCharta = chartographerService.getRestoredPartOfCharta(id, x, y, width, height);
         return ResponseEntity.ok().body(restoredPartOfCharta);
     }
+
+    @DeleteMapping("/{id}/")
+    public ResponseEntity<String> deleteCharta(@PathVariable String id) {
+        chartographerService.deleteCharta(id);
+        return ResponseEntity.ok().build();
+    }
 }

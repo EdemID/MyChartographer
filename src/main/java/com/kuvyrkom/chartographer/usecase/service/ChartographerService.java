@@ -84,19 +84,13 @@ public class ChartographerService {
             charta = charta.getSubimage(x, y, widthCharta - x, heightCharta - y);
 
             Graphics restoredPartOfChartaGraphics = restoredPartOfCharta.getGraphics();
-            /** удалить*/
-            restoredPartOfChartaGraphics.setColor(Color.YELLOW);
-            restoredPartOfChartaGraphics.fillRect(0, 0, width, height);
-            /***/
             restoredPartOfChartaGraphics.drawImage(charta, 0, 0, null);
-
             restoredPartOfChartaGraphics.dispose();
         } else {
             restoredPartOfCharta = charta.getSubimage(x, y, width, height);
         }
 
         ImageIO.write(restoredPartOfCharta, "bmp", byteArrayOutputStream);
-
         byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
         byteArrayOutputStream.close();
@@ -107,7 +101,11 @@ public class ChartographerService {
         return imageBytes;
     }
 
-    public static void compressAndWriteToFile(BufferedImage image, String filePath) throws IOException {
+    public void deleteCharta(String fileUUID) {
+        chartaService.delete(fileUUID);
+    }
+
+    private static void compressAndWriteToFile(BufferedImage image, String filePath) throws IOException {
         File compressedImageFile = new File(filePath);
         OutputStream os = new FileOutputStream(compressedImageFile);
 
@@ -118,17 +116,12 @@ public class ChartographerService {
         writer.setOutput(ios);
 
         ImageWriteParam param = writer.getDefaultWriteParam();
-
         param.setCompressionMode(ImageWriteParam.MODE_DEFAULT);
-//        param.setCompressionQuality(0.05F);
-//        param.setCompressionType("BI_RGB");
         writer.write(null, new IIOImage(image, null, null), param);
 
         os.close();
         ios.close();
         writer.dispose();
-
         image = null;
-        System.gc();
     }
 }
