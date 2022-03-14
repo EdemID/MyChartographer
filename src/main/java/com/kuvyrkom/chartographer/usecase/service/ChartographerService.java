@@ -1,6 +1,8 @@
 package com.kuvyrkom.chartographer.usecase.service;
 
+import com.kuvyrkom.chartographer.adapter.persistence.service.ChartaLockServiceImpl;
 import com.kuvyrkom.chartographer.adapter.persistence.service.ChartaServiceImpl;
+import com.kuvyrkom.chartographer.adapter.restapi.exception.ChartaLockedException;
 import com.kuvyrkom.chartographer.domain.model.Charta;
 import org.apache.commons.imaging.Imaging;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,11 @@ import java.util.UUID;
 public class ChartographerService {
 
     private ChartaServiceImpl chartaService;
+    private ChartaLockServiceImpl chartaLockService;
 
-    public ChartographerService(ChartaServiceImpl chartaService) {
+    public ChartographerService(ChartaServiceImpl chartaService, ChartaLockServiceImpl chartaLockService) {
         this.chartaService = chartaService;
+        this.chartaLockService = chartaLockService;
     }
 
     public String createNewCharta(int width, int height) throws IOException {
@@ -35,14 +39,20 @@ public class ChartographerService {
         Charta charta = new Charta(width, height, fileUUID, filePath);
         chartaService.save(charta);
 
+        chartaLockService.insertLockingInfo(fileUUID);
+
         bufferedImage.flush();
         bufferedImage = null;
         return fileUUID;
     }
 
     public void saveRestoredFragmentCharta(String id, int x, int y, int width, int height, MultipartFile multipartFile) throws Exception {
-        File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
+        if (chartaLockService.isLock(id)) {
+            throw new ChartaLockedException("Чарта с id " + id + " занята. Подождите");
+        }
+        chartaLockService.lockByFileUUID(id);
 
+        File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
         BufferedImage chartaImage = Imaging.getBufferedImage(chartaFile);
         BufferedImage image = ImageIO.read(multipartFile.getInputStream());
         BufferedImage fragment = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -63,9 +73,16 @@ public class ChartographerService {
         chartaFile = null;
         fragment = null;
         image = null;
+
+        chartaLockService.unlockByFileUUID(id);
     }
 
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int width, int height) throws Exception {
+        if (chartaLockService.isLock(id)) {
+            throw new ChartaLockedException("Чарта с id " + id + " занята. Подождите");
+        }
+        chartaLockService.lockByFileUUID(id);
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
         BufferedImage charta = Imaging.getBufferedImage(chartaFile);
@@ -89,6 +106,8 @@ public class ChartographerService {
         restoredPartOfCharta.flush();
         charta = null;
         restoredPartOfCharta = null;
+
+        chartaLockService.unlockByFileUUID(id);
         return imageBytes;
     }
 

@@ -1,5 +1,6 @@
 package com.kuvyrkom.chartographer.adapter.restapi.controller;
 
+import com.kuvyrkom.chartographer.adapter.restapi.exception.ChartaLockedException;
 import com.kuvyrkom.chartographer.adapter.restapi.exception.ChartaNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,12 @@ public class ExceptionController {
     public ResponseEntity<Response> handleFileNotFoundException(Exception e) {
         Response response = new Response(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = ChartaLockedException.class)
+    public ResponseEntity<Response> handleChartaLockedException(ChartaLockedException e) {
+        Response response = new Response(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.LOCKED);
     }
 
     static class Response {
