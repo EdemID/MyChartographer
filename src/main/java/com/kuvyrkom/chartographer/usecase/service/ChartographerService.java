@@ -32,7 +32,6 @@ public class ChartographerService {
 
         String filePath = "src/main/resources/graph/" + fileUUID + ".jpg";
         compressAndWriteToFile(bufferedImage, filePath);
-
         Charta charta = new Charta(width, height, fileUUID, filePath);
         chartaService.save(charta);
 
@@ -45,16 +44,11 @@ public class ChartographerService {
         File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
 
         BufferedImage chartaImage = Imaging.getBufferedImage(chartaFile);
-
         BufferedImage image = ImageIO.read(multipartFile.getInputStream());
         BufferedImage fragment = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics fragmentGraphics = fragment.getGraphics();
-        /** удалить*/
-        fragmentGraphics.setColor(Color.YELLOW);
-        fragmentGraphics.fillRect(0, 0, width, height);
-        /***/
-        fragmentGraphics.drawImage(image, 0, 0, null);
 
+        Graphics fragmentGraphics = fragment.getGraphics();
+        fragmentGraphics.drawImage(image, 0, 0, null);
         Graphics chartaGraphics = chartaImage.getGraphics();
         chartaGraphics.drawImage(fragment, x, y, null);
         ImageIO.write(chartaImage, "jpg", chartaFile);
@@ -73,7 +67,6 @@ public class ChartographerService {
 
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int width, int height) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
         File chartaFile = new File(chartaService.findByFileUUID(id).getFilePath());
         BufferedImage charta = Imaging.getBufferedImage(chartaFile);
         int widthCharta = charta.getWidth();
@@ -82,14 +75,12 @@ public class ChartographerService {
         BufferedImage restoredPartOfCharta = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         if (x + width > widthCharta || y + height > heightCharta) {
             charta = charta.getSubimage(x, y, widthCharta - x, heightCharta - y);
-
             Graphics restoredPartOfChartaGraphics = restoredPartOfCharta.getGraphics();
             restoredPartOfChartaGraphics.drawImage(charta, 0, 0, null);
             restoredPartOfChartaGraphics.dispose();
         } else {
             restoredPartOfCharta = charta.getSubimage(x, y, width, height);
         }
-
         ImageIO.write(restoredPartOfCharta, "bmp", byteArrayOutputStream);
         byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
@@ -111,10 +102,8 @@ public class ChartographerService {
 
         Iterator<ImageWriter> writers =  ImageIO.getImageWritersByFormatName("jpg");
         ImageWriter writer = (ImageWriter) writers.next();
-
         ImageOutputStream ios = ImageIO.createImageOutputStream(os);
         writer.setOutput(ios);
-
         ImageWriteParam param = writer.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_DEFAULT);
         writer.write(null, new IIOImage(image, null, null), param);
