@@ -92,8 +92,12 @@ public class ChartographerService {
         return imageBytes;
     }
 
-    public void deleteCharta(String fileUUID) {
-        chartaService.delete(fileUUID);
+    public void deleteCharta(String id) {
+        Charta charta = chartaService.findByFileUUID(id);
+        File chartaFile = new File(charta.getFilePath());
+        chartaFile.delete();
+
+        chartaService.delete(charta);
     }
 
     private static void compressAndWriteToFile(BufferedImage image, String filePath) throws IOException {

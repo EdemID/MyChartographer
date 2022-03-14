@@ -25,8 +25,7 @@ public class ChartaServiceImpl {
         return chartaRepository.findByFileUUID(fileUUID).orElseThrow(() -> new ChartaNotFoundException("Харта с UUID " + fileUUID + " не найдена"));
     }
 
-    public void delete(String fileUUID) {
-        Charta charta = findByFileUUID(fileUUID);
+    public void delete(Charta charta) {
         chartaRepository.delete(charta);
     }
 }
