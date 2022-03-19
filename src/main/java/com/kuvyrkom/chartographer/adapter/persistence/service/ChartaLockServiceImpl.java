@@ -19,7 +19,7 @@ public class ChartaLockServiceImpl {
         jdbcTemplate.update(value, fileUUID);
     }
 
-    public Boolean isLock(String fileUUID) {
+    public Boolean isLocked(String fileUUID) {
         String value = "SELECT lock FROM charta_lock where fileuuid = ?";
         return jdbcTemplate.queryForObject(value, Boolean.class, fileUUID);
     }
@@ -31,6 +31,11 @@ public class ChartaLockServiceImpl {
 
     public void unlockByFileUUID(String fileUUID) {
         String value = "UPDATE charta_lock SET lock = false WHERE fileuuid = ?";
+        jdbcTemplate.update(value, fileUUID);
+    }
+
+    public void deleteByFileUUID(String fileUUID) {
+        String value = "DELETE FROM charta_lock WHERE fileuuid = ?";
         jdbcTemplate.update(value, fileUUID);
     }
 }

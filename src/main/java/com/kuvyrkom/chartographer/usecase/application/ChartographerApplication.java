@@ -1,5 +1,6 @@
 package com.kuvyrkom.chartographer.usecase.application;
 
+import com.kuvyrkom.chartographer.infrastructure.util.ChartaUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -13,6 +14,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class ChartographerApplication {
 
 	public static void main(String[] args) {
+		ChartaUtil.createTmpChartaDirectory(args);
+
 		SpringApplication.run(ChartographerApplication.class, args);
 	}
 
