@@ -73,7 +73,7 @@ public class ChartaUtil {
     }
 
     /**
-     * Создание временной директории, в котором сервис сможет хранить данные
+     * Создание временной директории, в котором сервис сможет хранить данные. На всякий случай
      *
      * @param args  ожидаемый элемент массива является переданная строка-путь при запуске приложения
      */
@@ -81,11 +81,12 @@ public class ChartaUtil {
         File tmpChartaDirectory;
         if (args.length == 0) {
             tmpChartaDirectory = new File("target/imageCharta/");
+            ChartographerService.tmpChartaDirectory = tmpChartaDirectory.getPath();
         } else {
-            tmpChartaDirectory = new File(args[0]);
+            String path = args[0];
+            tmpChartaDirectory = new File(path);
+            ChartographerService.tmpChartaDirectory = path;
         }
         tmpChartaDirectory.mkdir();
-
-        ChartographerService.tmpChartaDirectory = tmpChartaDirectory.getPath();
     }
 }
