@@ -19,12 +19,15 @@ import java.util.Iterator;
 
 public class ChartaUtil {
 
-    public static void checkForExistenceAndLocking(BufferedImage chartaOriginal, ChartaLockServiceImpl chartaLockService, String fileUUID) {
-        if (chartaOriginal == null) {
-            throw new ChartaNotFoundException(fileUUID);
-        }
+    public static void checkForLocking(ChartaLockServiceImpl chartaLockService, String fileUUID) {
         if (chartaLockService.isLocked(fileUUID)) {
             throw new ChartaLockedException(fileUUID);
+        }
+    }
+
+    public static void checkForExistence(BufferedImage chartaOriginal, String fileUUID) {
+        if (chartaOriginal == null) {
+            throw new ChartaNotFoundException(fileUUID);
         }
     }
 

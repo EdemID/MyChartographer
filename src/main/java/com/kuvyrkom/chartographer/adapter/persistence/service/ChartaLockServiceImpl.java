@@ -15,7 +15,7 @@ public class ChartaLockServiceImpl {
     }
 
     public void insertLockingInfo(String fileUUID) {
-        String value = "INSERT INTO charta_lock (fileUUID) VALUES (?)";
+        String value = "INSERT INTO charta_lock (fileuuid) VALUES (?)";
         jdbcTemplate.update(value, fileUUID);
     }
 

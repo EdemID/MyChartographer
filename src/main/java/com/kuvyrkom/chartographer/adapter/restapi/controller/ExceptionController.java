@@ -1,7 +1,7 @@
 package com.kuvyrkom.chartographer.adapter.restapi.controller;
 
 import com.kuvyrkom.chartographer.adapter.persistence.exception.ChartaNotFoundException;
-import com.kuvyrkom.chartographer.usecase.exception.ChartaAlreadyCreatedException;
+import com.kuvyrkom.chartographer.usecase.exception.BigChartaAlreadyCreatedException;
 import com.kuvyrkom.chartographer.usecase.exception.ChartaLockedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.imageio.IIOException;
 import javax.validation.ConstraintViolationException;
 import java.awt.image.RasterFormatException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @ControllerAdvice
@@ -22,7 +23,7 @@ public class ExceptionController {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {IIOException.class, IOException.class, ChartaNotFoundException.class, ChartaLockedException.class, ChartaAlreadyCreatedException.class})
+    @ExceptionHandler(value = {FileNotFoundException.class, IIOException.class, IOException.class, ChartaNotFoundException.class, ChartaLockedException.class, BigChartaAlreadyCreatedException.class})
     public ResponseEntity<Response> handleException(Exception e) {
         Response response = new Response(e.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

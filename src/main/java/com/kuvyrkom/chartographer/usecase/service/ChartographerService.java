@@ -4,7 +4,8 @@ import com.kuvyrkom.chartographer.adapter.persistence.service.ChartaLockServiceI
 import com.kuvyrkom.chartographer.adapter.persistence.service.ChartaServiceImpl;
 import com.kuvyrkom.chartographer.domain.model.Charta;
 import com.kuvyrkom.chartographer.infrastructure.util.ChartaUtil;
-import com.kuvyrkom.chartographer.usecase.exception.ChartaAlreadyCreatedException;
+import com.kuvyrkom.chartographer.usecase.exception.BigChartaAlreadyCreatedException;
+import org.apache.commons.imaging.Imaging;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,9 +27,8 @@ public class ChartographerService {
     private static final String EX_FRAGMENT = "bmp";
 
     public static String tmpChartaDirectory;
-    private static BufferedImage chartaOriginal;
-    private static String fileUUID;
-    private static File fileCharta;
+    private static BufferedImage bigChartaOriginal;
+    private static String bigFileUUID;
 
     private ChartaServiceImpl chartaService;
     private ChartaLockServiceImpl chartaLockService;
@@ -39,14 +39,21 @@ public class ChartographerService {
     }
 
     public String createNewCharta(int width, int height) throws IOException {
-        if (chartaOriginal != null) {
-            throw new ChartaAlreadyCreatedException(fileUUID);
-        }
-        fileUUID = UUID.randomUUID().toString();
-        chartaOriginal = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
+        String fileUUID = UUID.randomUUID().toString();
         String filePath = tmpChartaDirectory + FileSystems.getDefault().getSeparator() + fileUUID + "." + EX_CHARTA;
-        fileCharta = new File(filePath);
+
+        if (bigChartaOriginal != null && height > 20000) {
+            throw new BigChartaAlreadyCreatedException(bigFileUUID);
+        }
+
+        BufferedImage chartaOriginal;
+        if (height > 20000) {
+            bigFileUUID = fileUUID;
+            bigChartaOriginal = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            chartaOriginal = bigChartaOriginal;
+        } else {
+            chartaOriginal = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        }
         compressAndWriteToFile(chartaOriginal, filePath, EX_CHARTA);
 
         Charta charta = new Charta(width, height, fileUUID, filePath);
@@ -57,8 +64,21 @@ public class ChartographerService {
     }
 
     public void saveRestoredFragmentCharta(String id, int x, int y, int width, int height, MultipartFile multipartFile) throws Exception {
-        ChartaUtil.checkForExistenceAndLocking(chartaOriginal, chartaLockService, id);
+        ChartaUtil.checkForLocking(chartaLockService, id);
         chartaLockService.lockByFileUUID(id);
+
+        Charta charta = chartaService.findByFileUUID(id);
+        String filePath = charta.getFilePath();
+        File fileCharta = new File(filePath);
+        int chartaHeight = charta.getHeight();
+
+        BufferedImage chartaOriginal;
+        if (chartaHeight > 20000) {
+            chartaOriginal = bigChartaOriginal;
+        } else {
+            chartaOriginal = Imaging.getBufferedImage(new File(filePath));
+        }
+        ChartaUtil.checkForExistence(chartaOriginal, id);
 
         BufferedImage transferredImageFragment = ImageIO.read(multipartFile.getInputStream());
         BufferedImage fragmentToSave = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -71,44 +91,62 @@ public class ChartographerService {
 
             fragmentGraphics.dispose();
             chartaGraphics.dispose();
+            fragmentGraphics = null;
+            chartaGraphics = null;
         } finally {
             fragmentToSave.flush();
             transferredImageFragment.flush();
             fragmentToSave = null;
             transferredImageFragment = null;
+            System.gc();
             chartaLockService.unlockByFileUUID(id);
         }
     }
 
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int fragmentWidth, int fragmentHeight) throws Exception {
-        ChartaUtil.checkForExistenceAndLocking(chartaOriginal, chartaLockService, id);
+        ChartaUtil.checkForLocking(chartaLockService, id);
         chartaLockService.lockByFileUUID(id);
+
+        Charta charta = chartaService.findByFileUUID(id);
+        int chartaHeight = charta.getHeight();
+        BufferedImage chartaOriginal;
+        if (chartaHeight > 20000) {
+            chartaOriginal = bigChartaOriginal;
+        } else {
+            String path = charta.getFilePath();
+            chartaOriginal = Imaging.getBufferedImage(new File(path));
+        }
+        ChartaUtil.checkForExistence(chartaOriginal, id);
+
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            BufferedImage charta = chartaOriginal;
-            int chartaWidth = charta.getWidth();
-            int chartaHeight = charta.getHeight();
+            BufferedImage bufferedCharta = chartaOriginal;
+            int bufferedChartaWidth = bufferedCharta.getWidth();
+            int bufferedChartaHeight = bufferedCharta.getHeight();
             BufferedImage restoredPartOfCharta = new BufferedImage(fragmentWidth, fragmentHeight, BufferedImage.TYPE_INT_RGB);
             Graphics restoredPartOfChartaGraphics = restoredPartOfCharta.getGraphics();
-            if (x + fragmentWidth > chartaWidth && y + fragmentHeight > chartaHeight) {
-                System.out.println(1);
-                charta = charta.getSubimage(x, y, chartaWidth - x, chartaHeight - y);
-            } else if (x + fragmentWidth > chartaWidth) {
-                System.out.println(2);
-                charta = charta.getSubimage(x, y, chartaWidth - x, fragmentHeight);
-            } else if (y + fragmentHeight > chartaHeight) {
-                System.out.println(3);
-                charta = charta.getSubimage(x, y, fragmentWidth, chartaHeight - y);
+            if (x + fragmentWidth > bufferedChartaWidth && y + fragmentHeight > bufferedChartaHeight) {
+                bufferedCharta = bufferedCharta.getSubimage(x, y, bufferedChartaWidth - x, bufferedChartaHeight - y);
+            } else if (x + fragmentWidth > bufferedChartaWidth) {
+                bufferedCharta = bufferedCharta.getSubimage(x, y, bufferedChartaWidth - x, fragmentHeight);
+            } else if (y + fragmentHeight > bufferedChartaHeight) {
+                bufferedCharta = bufferedCharta.getSubimage(x, y, fragmentWidth, bufferedChartaHeight - y);
             } else {
-                charta = charta.getSubimage(x, y, fragmentWidth, fragmentHeight);
+                bufferedCharta = bufferedCharta.getSubimage(x, y, fragmentWidth, fragmentHeight);
             }
-            restoredPartOfChartaGraphics.drawImage(charta, 0, 0, null);
+            restoredPartOfChartaGraphics.drawImage(bufferedCharta, 0, 0, null);
+            restoredPartOfChartaGraphics.dispose();
             ImageIO.write(restoredPartOfCharta, EX_FRAGMENT, byteArrayOutputStream);
             byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
             byteArrayOutputStream.close();
-            charta.flush();
+            bufferedCharta.flush();
             restoredPartOfCharta.flush();
+            byteArrayOutputStream = null;
+            bufferedCharta = null;
+            restoredPartOfCharta = null;
+            restoredPartOfChartaGraphics = null;
+            System.gc();
 
             return imageBytes;
         } finally {
@@ -118,13 +156,19 @@ public class ChartographerService {
 
     public void deleteCharta(String id) {
         Charta charta = chartaService.findByFileUUID(id);
-        fileCharta.delete();
-        chartaService.delete(charta);
-        chartaLockService.deleteByFileUUID(id);
+        String filePath = charta.getFilePath();
+        File fileCharta = new File(filePath);
 
-        chartaOriginal.flush();
-        chartaOriginal = null;
-        fileUUID = null;
-        fileCharta = null;
+        if (fileCharta.delete()) {
+            chartaService.delete(charta);
+            chartaLockService.deleteByFileUUID(id);
+        }
+
+        int chartaHeight = charta.getHeight();
+        if (chartaHeight > 20000) {
+            bigChartaOriginal.flush();
+            bigChartaOriginal = null;
+            bigFileUUID = null;
+        }
     }
 }
