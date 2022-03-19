@@ -1,4 +1,4 @@
-package com.kuvyrkom.chartographer.adapter.persistence.exception;
+package com.kuvyrkom.chartographer.usecase.exception;
 
 public class ChartaNotFoundException extends RuntimeException {
     public ChartaNotFoundException(String fileUUID) {

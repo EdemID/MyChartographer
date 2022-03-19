@@ -1,8 +1,8 @@
 package com.kuvyrkom.chartographer.adapter.persistence.service;
 
-import com.kuvyrkom.chartographer.adapter.persistence.exception.ChartaNotFoundException;
 import com.kuvyrkom.chartographer.adapter.persistence.repository.ChartaRepository;
 import com.kuvyrkom.chartographer.domain.model.Charta;
+import com.kuvyrkom.chartographer.usecase.exception.ChartaNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

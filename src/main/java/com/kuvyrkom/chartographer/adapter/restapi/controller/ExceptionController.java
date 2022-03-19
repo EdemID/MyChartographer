@@ -1,8 +1,8 @@
 package com.kuvyrkom.chartographer.adapter.restapi.controller;
 
-import com.kuvyrkom.chartographer.adapter.persistence.exception.ChartaNotFoundException;
 import com.kuvyrkom.chartographer.usecase.exception.BigChartaAlreadyCreatedException;
 import com.kuvyrkom.chartographer.usecase.exception.ChartaLockedException;
+import com.kuvyrkom.chartographer.usecase.exception.ChartaNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

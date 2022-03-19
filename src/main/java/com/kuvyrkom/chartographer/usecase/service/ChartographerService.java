@@ -20,6 +20,9 @@ import java.util.UUID;
 
 import static com.kuvyrkom.chartographer.infrastructure.util.ChartaUtil.compressAndWriteToFile;
 
+/**
+ * Класс бизнес логики
+ */
 @Service
 public class ChartographerService {
 
@@ -38,6 +41,14 @@ public class ChartographerService {
         this.chartaLockService = chartaLockService;
     }
 
+    /**
+     * Создание новой чарты
+     * Создание чарты высотой от 20000 ограничено в количестве единицы для избежания Java heap space
+     *
+     * @param width     ширина чарты
+     * @param height    высота чарты
+     * @return          возвращает fileUUID чарты
+     */
     public String createNewCharta(int width, int height) throws IOException {
         String fileUUID = UUID.randomUUID().toString();
         String filePath = tmpChartaDirectory + FileSystems.getDefault().getSeparator() + fileUUID + "." + EX_CHARTA;
@@ -63,6 +74,16 @@ public class ChartographerService {
         return fileUUID;
     }
 
+    /**
+     * Сохранение восстановленного фрагмента изображения
+     *
+     * @param id                fileUUID чарты
+     * @param x                 ось абсцисс
+     * @param y                 ось ордината
+     * @param width             ширина фрагмента
+     * @param height            высота фрагмента
+     * @param multipartFile     переданный фрагмент изображения
+     */
     public void saveRestoredFragmentCharta(String id, int x, int y, int width, int height, MultipartFile multipartFile) throws Exception {
         ChartaUtil.checkForLocking(chartaLockService, id);
         chartaLockService.lockByFileUUID(id);
@@ -103,6 +124,16 @@ public class ChartographerService {
         }
     }
 
+    /**
+     * Получение восстановленной части изображения
+     *
+     * @param id                fileUUID чарты
+     * @param x                 ось абсцисс
+     * @param y                 ось ордината
+     * @param fragmentWidth     ширина фрагмента
+     * @param fragmentHeight    высота фрагмента
+     * @return byte[]           возвращает изображение в байтовом представлении
+     */
     public byte[] getRestoredPartOfCharta(String id, int x, int y, int fragmentWidth, int fragmentHeight) throws Exception {
         ChartaUtil.checkForLocking(chartaLockService, id);
         chartaLockService.lockByFileUUID(id);

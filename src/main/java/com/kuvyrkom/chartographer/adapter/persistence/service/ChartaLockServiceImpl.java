@@ -4,6 +4,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Сервисный класс для блокирования/разблокирования чарты
+ * Необходимо для того, чтобы невозможно было пользоваться одной чартой одновременно
+ */
 @Service
 @Transactional
 public class ChartaLockServiceImpl {
